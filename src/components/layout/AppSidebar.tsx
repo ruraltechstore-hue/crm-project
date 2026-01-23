@@ -6,6 +6,8 @@ import {
   Building2,
   Shield,
   ChevronLeft,
+  UsersRound,
+  FileText,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,9 +45,19 @@ const adminNavItems = [
     icon: Users,
   },
   {
+    title: "Teams",
+    url: "/admin/teams",
+    icon: UsersRound,
+  },
+  {
     title: "Roles",
     url: "/admin/roles",
     icon: Shield,
+  },
+  {
+    title: "Audit Logs",
+    url: "/admin/audit-logs",
+    icon: FileText,
   },
 ];
 
