@@ -11,6 +11,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Auth from "@/pages/Auth";
 import Dashboard from "@/pages/Dashboard";
 import Settings from "@/pages/Settings";
+import Leads from "@/pages/Leads";
+import LeadDetail from "@/pages/LeadDetail";
 import AdminUsers from "@/pages/admin/Users";
 import AdminRoles from "@/pages/admin/Roles";
 import AdminTeams from "@/pages/admin/Teams";
@@ -42,6 +44,8 @@ const App = () => (
               }
             >
               <Route path="/" element={<Dashboard />} />
+              <Route path="/leads" element={<Leads />} />
+              <Route path="/leads/:leadId" element={<LeadDetail />} />
               <Route path="/settings" element={<Settings />} />
 
               {/* Admin routes */}

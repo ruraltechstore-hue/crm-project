@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   UsersRound,
   FileText,
+  UserPlus,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,6 +36,11 @@ const mainNavItems = [
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Leads",
+    url: "/leads",
+    icon: UserPlus,
   },
 ];
 
