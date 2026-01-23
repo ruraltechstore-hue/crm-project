@@ -11,6 +11,7 @@ export interface Lead {
   owner_id: string;
   status: LeadStatus;
   notes: string | null;
+  converted_to_contact_id: string | null;
   created_at: string;
   updated_at: string;
   owner?: {

@@ -42,6 +42,11 @@ const mainNavItems = [
     url: "/leads",
     icon: UserPlus,
   },
+  {
+    title: "Contacts",
+    url: "/contacts",
+    icon: Users,
+  },
 ];
 
 const adminNavItems = [

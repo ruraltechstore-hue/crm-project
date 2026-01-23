@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Phone, Mail, Calendar, User, Edit, UserCog } from "lucide-react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { ArrowLeft, Phone, Mail, Calendar, User, Edit, UserCog, UserCheck, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { useLead, useLeads, useLeadActivities, useLeadStatusHistory } from "@/hooks/useLeads";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { LeadStatusBadge } from "@/components/leads/LeadStatusBadge";
 import { LeadStatusSelect } from "@/components/leads/LeadStatusSelect";
 import { LeadActivityTimeline } from "@/components/leads/LeadActivityTimeline";
@@ -15,6 +16,7 @@ import { LeadStatusHistoryTimeline } from "@/components/leads/LeadStatusHistoryT
 import { AddActivityDialog } from "@/components/leads/AddActivityDialog";
 import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
 import { ReassignLeadDialog } from "@/components/leads/ReassignLeadDialog";
+import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
 import { LEAD_SOURCES } from "@/types/leads";
 
 export default function LeadDetail() {
@@ -29,10 +31,12 @@ export default function LeadDetail() {
   const [addActivityOpen, setAddActivityOpen] = useState(false);
   const [editLeadOpen, setEditLeadOpen] = useState(false);
   const [reassignOpen, setReassignOpen] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
 
   const isOwner = lead?.owner_id === user?.id;
   const canEdit = isAdmin || isManager || isOwner;
   const canReassign = isAdmin || isManager;
+  const canConvert = canEdit && lead?.status !== "converted" && !lead?.converted_to_contact_id;
 
   if (isLoading) {
     return (
@@ -78,6 +82,20 @@ export default function LeadDetail() {
           </div>
         </div>
         <div className="flex gap-2">
+          {canConvert && (
+            <Button onClick={() => setConvertOpen(true)}>
+              <UserCheck className="mr-2 h-4 w-4" />
+              Convert to Contact
+            </Button>
+          )}
+          {lead.converted_to_contact_id && (
+            <Link to={`/contacts/${lead.converted_to_contact_id}`}>
+              <Button variant="outline">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Contact
+              </Button>
+            </Link>
+          )}
           {canReassign && (
             <Button variant="outline" onClick={() => setReassignOpen(true)}>
               <UserCog className="mr-2 h-4 w-4" />
@@ -281,6 +299,12 @@ export default function LeadDetail() {
       <ReassignLeadDialog
         open={reassignOpen}
         onOpenChange={setReassignOpen}
+        lead={lead}
+      />
+
+      <ConvertLeadDialog
+        open={convertOpen}
+        onOpenChange={setConvertOpen}
         lead={lead}
       />
     </div>
