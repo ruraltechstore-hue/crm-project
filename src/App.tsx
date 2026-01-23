@@ -13,6 +13,9 @@ import Dashboard from "@/pages/Dashboard";
 import Settings from "@/pages/Settings";
 import AdminUsers from "@/pages/admin/Users";
 import AdminRoles from "@/pages/admin/Roles";
+import AdminTeams from "@/pages/admin/Teams";
+import TeamDetail from "@/pages/admin/TeamDetail";
+import AuditLogs from "@/pages/admin/AuditLogs";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "@/pages/NotFound";
 
@@ -51,10 +54,34 @@ const App = () => (
                 }
               />
               <Route
+                path="/admin/teams"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminTeams />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/teams/:teamId"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <TeamDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/admin/roles"
                 element={
                   <ProtectedRoute requiredRole="admin">
                     <AdminRoles />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/audit-logs"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AuditLogs />
                   </ProtectedRoute>
                 }
               />
