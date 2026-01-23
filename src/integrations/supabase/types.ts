@@ -53,6 +53,121 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          description: string
+          id: string
+          lead_id: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          description: string
+          id?: string
+          lead_id: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          lead_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_status_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          id: string
+          lead_id: string
+          new_status: Database["public"]["Enums"]["lead_status"]
+          notes: string | null
+          old_status: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          new_status: Database["public"]["Enums"]["lead_status"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          new_status?: Database["public"]["Enums"]["lead_status"]
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["lead_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_status_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          inquiry_date: string
+          name: string
+          notes: string | null
+          owner_id: string
+          phone: string | null
+          source: Database["public"]["Enums"]["lead_source"]
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          inquiry_date?: string
+          name: string
+          notes?: string | null
+          owner_id: string
+          phone?: string | null
+          source?: Database["public"]["Enums"]["lead_source"]
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          inquiry_date?: string
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          phone?: string | null
+          source?: Database["public"]["Enums"]["lead_source"]
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -213,6 +328,15 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "user"
+      lead_source:
+        | "website"
+        | "whatsapp"
+        | "instagram"
+        | "referral"
+        | "call"
+        | "email"
+        | "other"
+      lead_status: "new" | "contacted" | "interested" | "converted" | "lost"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -341,6 +465,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "user"],
+      lead_source: [
+        "website",
+        "whatsapp",
+        "instagram",
+        "referral",
+        "call",
+        "email",
+        "other",
+      ],
+      lead_status: ["new", "contacted", "interested", "converted", "lost"],
     },
   },
 } as const
