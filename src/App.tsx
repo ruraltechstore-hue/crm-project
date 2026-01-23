@@ -13,6 +13,8 @@ import Dashboard from "@/pages/Dashboard";
 import Settings from "@/pages/Settings";
 import Leads from "@/pages/Leads";
 import LeadDetail from "@/pages/LeadDetail";
+import Contacts from "@/pages/Contacts";
+import ContactDetail from "@/pages/ContactDetail";
 import AdminUsers from "@/pages/admin/Users";
 import AdminRoles from "@/pages/admin/Roles";
 import AdminTeams from "@/pages/admin/Teams";
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/leads" element={<Leads />} />
               <Route path="/leads/:leadId" element={<LeadDetail />} />
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="/contacts/:contactId" element={<ContactDetail />} />
               <Route path="/settings" element={<Settings />} />
 
               {/* Admin routes */}
