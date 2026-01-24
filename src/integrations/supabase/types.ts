@@ -223,6 +223,142 @@ export type Database = {
           },
         ]
       }
+      deal_activities: {
+        Row: {
+          activity_type: string
+          created_at: string
+          deal_id: string
+          description: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          deal_id: string
+          description: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          deal_id?: string
+          description?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_activities_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deal_stage_history: {
+        Row: {
+          changed_by: string
+          created_at: string
+          deal_id: string
+          id: string
+          new_stage: Database["public"]["Enums"]["deal_stage"]
+          notes: string | null
+          old_stage: Database["public"]["Enums"]["deal_stage"] | null
+        }
+        Insert: {
+          changed_by: string
+          created_at?: string
+          deal_id: string
+          id?: string
+          new_stage: Database["public"]["Enums"]["deal_stage"]
+          notes?: string | null
+          old_stage?: Database["public"]["Enums"]["deal_stage"] | null
+        }
+        Update: {
+          changed_by?: string
+          created_at?: string
+          deal_id?: string
+          id?: string
+          new_stage?: Database["public"]["Enums"]["deal_stage"]
+          notes?: string | null
+          old_stage?: Database["public"]["Enums"]["deal_stage"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_stage_history_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          actual_close_date: string | null
+          confirmed_value: number | null
+          contact_id: string | null
+          created_at: string
+          estimated_value: number | null
+          expected_close_date: string | null
+          id: string
+          lead_id: string | null
+          name: string
+          notes: string | null
+          owner_id: string
+          stage: Database["public"]["Enums"]["deal_stage"]
+          updated_at: string
+        }
+        Insert: {
+          actual_close_date?: string | null
+          confirmed_value?: number | null
+          contact_id?: string | null
+          created_at?: string
+          estimated_value?: number | null
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string | null
+          name: string
+          notes?: string | null
+          owner_id: string
+          stage?: Database["public"]["Enums"]["deal_stage"]
+          updated_at?: string
+        }
+        Update: {
+          actual_close_date?: string | null
+          confirmed_value?: number | null
+          contact_id?: string | null
+          created_at?: string
+          estimated_value?: number | null
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string | null
+          name?: string
+          notes?: string | null
+          owner_id?: string
+          stage?: Database["public"]["Enums"]["deal_stage"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_activities: {
         Row: {
           activity_type: string
@@ -509,6 +645,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "user"
+      deal_stage:
+        | "inquiry"
+        | "proposal"
+        | "negotiation"
+        | "closed_won"
+        | "closed_lost"
       lead_source:
         | "website"
         | "whatsapp"
@@ -646,6 +788,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "user"],
+      deal_stage: [
+        "inquiry",
+        "proposal",
+        "negotiation",
+        "closed_won",
+        "closed_lost",
+      ],
       lead_source: [
         "website",
         "whatsapp",

@@ -15,6 +15,8 @@ import Leads from "@/pages/Leads";
 import LeadDetail from "@/pages/LeadDetail";
 import Contacts from "@/pages/Contacts";
 import ContactDetail from "@/pages/ContactDetail";
+import Deals from "@/pages/Deals";
+import DealDetail from "@/pages/DealDetail";
 import AdminUsers from "@/pages/admin/Users";
 import AdminRoles from "@/pages/admin/Roles";
 import AdminTeams from "@/pages/admin/Teams";
@@ -50,6 +52,8 @@ const App = () => (
               <Route path="/leads/:leadId" element={<LeadDetail />} />
               <Route path="/contacts" element={<Contacts />} />
               <Route path="/contacts/:contactId" element={<ContactDetail />} />
+              <Route path="/deals" element={<Deals />} />
+              <Route path="/deals/:dealId" element={<DealDetail />} />
               <Route path="/settings" element={<Settings />} />
 
               {/* Admin routes */}
