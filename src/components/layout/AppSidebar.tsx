@@ -9,6 +9,7 @@ import {
   UsersRound,
   FileText,
   UserPlus,
+  Briefcase,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,6 +47,11 @@ const mainNavItems = [
     title: "Contacts",
     url: "/contacts",
     icon: Users,
+  },
+  {
+    title: "Deals",
+    url: "/deals",
+    icon: Briefcase,
   },
 ];
 
