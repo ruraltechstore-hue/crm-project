@@ -53,6 +53,73 @@ export type Database = {
         }
         Relationships: []
       }
+      communications: {
+        Row: {
+          contact_id: string | null
+          content: string | null
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          direction: Database["public"]["Enums"]["communication_direction"]
+          duration_minutes: number | null
+          id: string
+          lead_id: string | null
+          scheduled_at: string | null
+          subject: string | null
+          type: Database["public"]["Enums"]["communication_type"]
+        }
+        Insert: {
+          contact_id?: string | null
+          content?: string | null
+          created_at?: string
+          created_by: string
+          deal_id?: string | null
+          direction?: Database["public"]["Enums"]["communication_direction"]
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          scheduled_at?: string | null
+          subject?: string | null
+          type: Database["public"]["Enums"]["communication_type"]
+        }
+        Update: {
+          contact_id?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          direction?: Database["public"]["Enums"]["communication_direction"]
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          scheduled_at?: string | null
+          subject?: string | null
+          type?: Database["public"]["Enums"]["communication_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communications_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_activities: {
         Row: {
           activity_type: string
@@ -485,6 +552,58 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          contact_id: string | null
+          content: string
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          id: string
+          lead_id: string | null
+        }
+        Insert: {
+          contact_id?: string | null
+          content: string
+          created_at?: string
+          created_by: string
+          deal_id?: string | null
+          id?: string
+          lead_id?: string | null
+        }
+        Update: {
+          contact_id?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          id?: string
+          lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -514,6 +633,85 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tasks: {
+        Row: {
+          assigned_to: string
+          completed_at: string | null
+          completed_by: string | null
+          contact_id: string | null
+          created_at: string
+          created_by: string
+          deal_id: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          lead_id: string | null
+          priority: Database["public"]["Enums"]["task_priority"]
+          reminder_at: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to: string
+          completed_at?: string | null
+          completed_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by: string
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lead_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          reminder_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string
+          deal_id?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lead_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          reminder_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -645,6 +843,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "user"
+      communication_direction: "inbound" | "outbound"
+      communication_type:
+        | "call"
+        | "email"
+        | "meeting"
+        | "whatsapp"
+        | "chat"
+        | "other"
       deal_stage:
         | "inquiry"
         | "proposal"
@@ -660,6 +866,8 @@ export type Database = {
         | "email"
         | "other"
       lead_status: "new" | "contacted" | "interested" | "converted" | "lost"
+      task_priority: "low" | "medium" | "high" | "urgent"
+      task_status: "pending" | "in_progress" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -788,6 +996,15 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "user"],
+      communication_direction: ["inbound", "outbound"],
+      communication_type: [
+        "call",
+        "email",
+        "meeting",
+        "whatsapp",
+        "chat",
+        "other",
+      ],
       deal_stage: [
         "inquiry",
         "proposal",
@@ -805,6 +1022,8 @@ export const Constants = {
         "other",
       ],
       lead_status: ["new", "contacted", "interested", "converted", "lost"],
+      task_priority: ["low", "medium", "high", "urgent"],
+      task_status: ["pending", "in_progress", "completed", "cancelled"],
     },
   },
 } as const

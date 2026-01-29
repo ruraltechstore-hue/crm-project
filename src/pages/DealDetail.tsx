@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDeal, useDealActivities, useDealStageHistory, useDeals } from "@/hooks/useDeals";
+import { useCommunications } from "@/hooks/useCommunications";
+import { useNotes } from "@/hooks/useNotes";
+import { useTasks } from "@/hooks/useTasks";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -16,6 +20,12 @@ import { DealActivityTimeline } from "@/components/deals/DealActivityTimeline";
 import { DealStageHistoryTimeline } from "@/components/deals/DealStageHistoryTimeline";
 import { AddDealActivityDialog } from "@/components/deals/AddDealActivityDialog";
 import { EditDealDialog } from "@/components/deals/EditDealDialog";
+import { CommunicationTimeline } from "@/components/communications/CommunicationTimeline";
+import { AddCommunicationDialog } from "@/components/communications/AddCommunicationDialog";
+import { NotesList } from "@/components/notes/NotesList";
+import { AddNoteDialog } from "@/components/notes/AddNoteDialog";
+import { TaskList } from "@/components/tasks/TaskList";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 import { DEAL_STAGES, DealStage } from "@/types/deals";
 import {
   ArrowLeft,
@@ -27,6 +37,9 @@ import {
   Building,
   FileText,
   Link as LinkIcon,
+  MessageSquare,
+  StickyNote,
+  CheckSquare,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -37,9 +50,15 @@ export default function DealDetail() {
   const { updateDealStage } = useDeals();
   const { activities, loading: activitiesLoading, addActivity } = useDealActivities(dealId!);
   const { history, loading: historyLoading } = useDealStageHistory(dealId!);
+  const { communications, loading: commsLoading, addCommunication } = useCommunications({ dealId: dealId! });
+  const { notes, loading: notesLoading, addNote } = useNotes({ dealId: dealId! });
+  const { tasks, loading: tasksLoading, createTask, updateTaskStatus } = useTasks({ dealId: dealId! });
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [activityDialogOpen, setActivityDialogOpen] = useState(false);
+  const [addCommOpen, setAddCommOpen] = useState(false);
+  const [addNoteOpen, setAddNoteOpen] = useState(false);
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
 
   const handleStageChange = async (newStage: DealStage) => {
     if (deal) {
@@ -178,6 +197,57 @@ export default function DealDetail() {
             </CardContent>
           </Card>
 
+          {/* Activity Tabs */}
+          <Tabs defaultValue="activity">
+            <TabsList className="flex-wrap">
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="communications">Comms</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            </TabsList>
+            <TabsContent value="activity" className="mt-4">
+              <DealActivityTimeline activities={activities} loading={activitiesLoading} />
+            </TabsContent>
+            <TabsContent value="communications" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddCommOpen(true)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Log Communication
+                  </Button>
+                </div>
+                <CommunicationTimeline communications={communications} loading={commsLoading} />
+              </div>
+            </TabsContent>
+            <TabsContent value="notes" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddNoteOpen(true)}>
+                    <StickyNote className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                </div>
+                <NotesList notes={notes} loading={notesLoading} />
+              </div>
+            </TabsContent>
+            <TabsContent value="tasks" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddTaskOpen(true)}>
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Create Task
+                  </Button>
+                </div>
+                <TaskList
+                  tasks={tasks}
+                  loading={tasksLoading}
+                  onStatusChange={updateTaskStatus}
+                  showLinks={false}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+
           {/* Linked Records */}
           <Card>
             <CardHeader>
@@ -220,9 +290,6 @@ export default function DealDetail() {
               )}
             </CardContent>
           </Card>
-
-          {/* Activity Timeline */}
-          <DealActivityTimeline activities={activities} loading={activitiesLoading} />
         </div>
 
         {/* Sidebar */}
@@ -263,6 +330,27 @@ export default function DealDetail() {
         open={activityDialogOpen}
         onOpenChange={setActivityDialogOpen}
         onSubmit={addActivity}
+      />
+      <AddCommunicationDialog
+        open={addCommOpen}
+        onOpenChange={setAddCommOpen}
+        onSubmit={addCommunication}
+        defaultLinkType="deal"
+        defaultLinkId={dealId}
+      />
+      <AddNoteDialog
+        open={addNoteOpen}
+        onOpenChange={setAddNoteOpen}
+        onSubmit={addNote}
+        defaultLinkType="deal"
+        defaultLinkId={dealId}
+      />
+      <CreateTaskDialog
+        open={addTaskOpen}
+        onOpenChange={setAddTaskOpen}
+        onSubmit={createTask}
+        defaultLinkType="deal"
+        defaultLinkId={dealId}
       />
     </div>
   );
