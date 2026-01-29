@@ -10,6 +10,8 @@ import {
   FileText,
   UserPlus,
   Briefcase,
+  CheckSquare,
+  BarChart3,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,6 +54,16 @@ const mainNavItems = [
     title: "Deals",
     url: "/deals",
     icon: Briefcase,
+  },
+  {
+    title: "Tasks",
+    url: "/tasks",
+    icon: CheckSquare,
+  },
+  {
+    title: "Reports",
+    url: "/reports",
+    icon: BarChart3,
   },
 ];
 

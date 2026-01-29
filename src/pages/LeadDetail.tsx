@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Phone, Mail, Calendar, User, Edit, UserCog, UserCheck, ExternalLink } from "lucide-react";
+import { ArrowLeft, Phone, Mail, Calendar, User, Edit, UserCog, UserCheck, ExternalLink, Plus, MessageSquare, StickyNote, CheckSquare } from "lucide-react";
 import { format } from "date-fns";
 import { useLead, useLeads, useLeadActivities, useLeadStatusHistory } from "@/hooks/useLeads";
+import { useCommunications } from "@/hooks/useCommunications";
+import { useNotes } from "@/hooks/useNotes";
+import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +20,12 @@ import { AddActivityDialog } from "@/components/leads/AddActivityDialog";
 import { EditLeadDialog } from "@/components/leads/EditLeadDialog";
 import { ReassignLeadDialog } from "@/components/leads/ReassignLeadDialog";
 import { ConvertLeadDialog } from "@/components/leads/ConvertLeadDialog";
+import { CommunicationTimeline } from "@/components/communications/CommunicationTimeline";
+import { AddCommunicationDialog } from "@/components/communications/AddCommunicationDialog";
+import { NotesList } from "@/components/notes/NotesList";
+import { AddNoteDialog } from "@/components/notes/AddNoteDialog";
+import { TaskList } from "@/components/tasks/TaskList";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 import { LEAD_SOURCES } from "@/types/leads";
 
 export default function LeadDetail() {
@@ -27,11 +36,17 @@ export default function LeadDetail() {
   const { updateLeadStatus } = useLeads();
   const { activities, isLoading: activitiesLoading, addActivity } = useLeadActivities(leadId!);
   const { data: statusHistory, isLoading: historyLoading } = useLeadStatusHistory(leadId!);
+  const { communications, loading: commsLoading, addCommunication } = useCommunications({ leadId: leadId! });
+  const { notes, loading: notesLoading, addNote } = useNotes({ leadId: leadId! });
+  const { tasks, loading: tasksLoading, createTask, updateTaskStatus } = useTasks({ leadId: leadId! });
 
   const [addActivityOpen, setAddActivityOpen] = useState(false);
   const [editLeadOpen, setEditLeadOpen] = useState(false);
   const [reassignOpen, setReassignOpen] = useState(false);
   const [convertOpen, setConvertOpen] = useState(false);
+  const [addCommOpen, setAddCommOpen] = useState(false);
+  const [addNoteOpen, setAddNoteOpen] = useState(false);
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
 
   const isOwner = lead?.owner_id === user?.id;
   const canEdit = isAdmin || isManager || isOwner;
@@ -189,6 +204,9 @@ export default function LeadDetail() {
           <Tabs defaultValue="activity">
             <TabsList>
               <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="communications">Communications</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
               <TabsTrigger value="history">Status History</TabsTrigger>
             </TabsList>
             <TabsContent value="activity" className="mt-4">
@@ -213,6 +231,44 @@ export default function LeadDetail() {
                   />
                 </CardContent>
               </Card>
+            </TabsContent>
+            <TabsContent value="communications" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddCommOpen(true)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Log Communication
+                  </Button>
+                </div>
+                <CommunicationTimeline communications={communications} loading={commsLoading} />
+              </div>
+            </TabsContent>
+            <TabsContent value="notes" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddNoteOpen(true)}>
+                    <StickyNote className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                </div>
+                <NotesList notes={notes} loading={notesLoading} />
+              </div>
+            </TabsContent>
+            <TabsContent value="tasks" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddTaskOpen(true)}>
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Create Task
+                  </Button>
+                </div>
+                <TaskList
+                  tasks={tasks}
+                  loading={tasksLoading}
+                  onStatusChange={updateTaskStatus}
+                  showLinks={false}
+                />
+              </div>
             </TabsContent>
             <TabsContent value="history" className="mt-4">
               <Card>
@@ -306,6 +362,30 @@ export default function LeadDetail() {
         open={convertOpen}
         onOpenChange={setConvertOpen}
         lead={lead}
+      />
+
+      <AddCommunicationDialog
+        open={addCommOpen}
+        onOpenChange={setAddCommOpen}
+        onSubmit={addCommunication}
+        defaultLinkType="lead"
+        defaultLinkId={leadId}
+      />
+
+      <AddNoteDialog
+        open={addNoteOpen}
+        onOpenChange={setAddNoteOpen}
+        onSubmit={addNote}
+        defaultLinkType="lead"
+        defaultLinkId={leadId}
+      />
+
+      <CreateTaskDialog
+        open={addTaskOpen}
+        onOpenChange={setAddTaskOpen}
+        onSubmit={createTask}
+        defaultLinkType="lead"
+        defaultLinkId={leadId}
       />
     </div>
   );

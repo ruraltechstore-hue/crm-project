@@ -10,9 +10,15 @@ import {
   Edit,
   Briefcase,
   ExternalLink,
+  MessageSquare,
+  StickyNote,
+  CheckSquare,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useContact, useContactActivities } from "@/hooks/useContacts";
+import { useCommunications } from "@/hooks/useCommunications";
+import { useNotes } from "@/hooks/useNotes";
+import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +28,12 @@ import { Badge } from "@/components/ui/badge";
 import { ContactActivityTimeline } from "@/components/contacts/ContactActivityTimeline";
 import { AddContactActivityDialog } from "@/components/contacts/AddContactActivityDialog";
 import { EditContactDialog } from "@/components/contacts/EditContactDialog";
+import { CommunicationTimeline } from "@/components/communications/CommunicationTimeline";
+import { AddCommunicationDialog } from "@/components/communications/AddCommunicationDialog";
+import { NotesList } from "@/components/notes/NotesList";
+import { AddNoteDialog } from "@/components/notes/AddNoteDialog";
+import { TaskList } from "@/components/tasks/TaskList";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 import { PHONE_TYPES, EMAIL_TYPES } from "@/types/contacts";
 
 export default function ContactDetail() {
@@ -30,9 +42,15 @@ export default function ContactDetail() {
   const { user, isAdmin, isManager } = useAuth();
   const { data: contact, isLoading } = useContact(contactId!);
   const { activities, isLoading: activitiesLoading, addActivity } = useContactActivities(contactId!);
+  const { communications, loading: commsLoading, addCommunication } = useCommunications({ contactId: contactId! });
+  const { notes, loading: notesLoading, addNote } = useNotes({ contactId: contactId! });
+  const { tasks, loading: tasksLoading, createTask, updateTaskStatus } = useTasks({ contactId: contactId! });
 
   const [addActivityOpen, setAddActivityOpen] = useState(false);
   const [editContactOpen, setEditContactOpen] = useState(false);
+  const [addCommOpen, setAddCommOpen] = useState(false);
+  const [addNoteOpen, setAddNoteOpen] = useState(false);
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
 
   const isOwner = contact?.owner_id === user?.id;
   const canEdit = isAdmin || isManager || isOwner;
@@ -214,28 +232,76 @@ export default function ContactDetail() {
             </CardContent>
           </Card>
 
-          {/* Activity */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Activity Timeline</CardTitle>
-                <CardDescription>
-                  Track all interactions with this contact
-                </CardDescription>
+          {/* Activity Tabs */}
+          <Tabs defaultValue="activity">
+            <TabsList>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="communications">Communications</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            </TabsList>
+            <TabsContent value="activity" className="mt-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Activity Timeline</CardTitle>
+                    <CardDescription>
+                      Track all interactions with this contact
+                    </CardDescription>
+                  </div>
+                  {canEdit && (
+                    <Button size="sm" onClick={() => setAddActivityOpen(true)}>
+                      Add Activity
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <ContactActivityTimeline
+                    activities={activities}
+                    isLoading={activitiesLoading}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="communications" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddCommOpen(true)}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Log Communication
+                  </Button>
+                </div>
+                <CommunicationTimeline communications={communications} loading={commsLoading} />
               </div>
-              {canEdit && (
-                <Button size="sm" onClick={() => setAddActivityOpen(true)}>
-                  Add Activity
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent>
-              <ContactActivityTimeline
-                activities={activities}
-                isLoading={activitiesLoading}
-              />
-            </CardContent>
-          </Card>
+            </TabsContent>
+            <TabsContent value="notes" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddNoteOpen(true)}>
+                    <StickyNote className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                </div>
+                <NotesList notes={notes} loading={notesLoading} />
+              </div>
+            </TabsContent>
+            <TabsContent value="tasks" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={() => setAddTaskOpen(true)}>
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Create Task
+                  </Button>
+                </div>
+                <TaskList
+                  tasks={tasks}
+                  loading={tasksLoading}
+                  onStatusChange={updateTaskStatus}
+                  showLinks={false}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Sidebar */}
@@ -312,6 +378,30 @@ export default function ContactDetail() {
           contact={contact}
         />
       )}
+
+      <AddCommunicationDialog
+        open={addCommOpen}
+        onOpenChange={setAddCommOpen}
+        onSubmit={addCommunication}
+        defaultLinkType="contact"
+        defaultLinkId={contactId}
+      />
+
+      <AddNoteDialog
+        open={addNoteOpen}
+        onOpenChange={setAddNoteOpen}
+        onSubmit={addNote}
+        defaultLinkType="contact"
+        defaultLinkId={contactId}
+      />
+
+      <CreateTaskDialog
+        open={addTaskOpen}
+        onOpenChange={setAddTaskOpen}
+        onSubmit={createTask}
+        defaultLinkType="contact"
+        defaultLinkId={contactId}
+      />
     </div>
   );
 }
