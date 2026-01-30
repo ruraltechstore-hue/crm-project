@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_logs: {
+        Row: {
+          action_taken: string
+          automation_type: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          error_message: string | null
+          id: string
+          status: string
+          trigger_event: string
+        }
+        Insert: {
+          action_taken: string
+          automation_type: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          error_message?: string | null
+          id?: string
+          status?: string
+          trigger_event: string
+        }
+        Update: {
+          action_taken?: string
+          automation_type?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          error_message?: string | null
+          id?: string
+          status?: string
+          trigger_event?: string
+        }
+        Relationships: []
+      }
       communications: {
         Row: {
           contact_id: string | null
@@ -426,6 +462,109 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          lead_id: string | null
+          mime_type: string | null
+          name: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          lead_id?: string | null
+          mime_type?: string | null
+          name: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          lead_id?: string | null
+          mime_type?: string | null
+          name?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          subject: string
+          trigger_type: string | null
+          trigger_value: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name: string
+          subject: string
+          trigger_type?: string | null
+          trigger_value?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          subject?: string
+          trigger_type?: string | null
+          trigger_value?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_activities: {
         Row: {
           activity_type: string
@@ -631,6 +770,33 @@ export type Database = {
           id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      system_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
