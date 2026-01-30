@@ -27,10 +27,7 @@ export function useDocuments(params: UseDocumentsParams = {}) {
       setLoading(true);
       let query = supabase
         .from("documents")
-        .select(`
-          *,
-          uploader:profiles!documents_uploaded_by_fkey(full_name, email)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (leadId) {
@@ -44,7 +41,31 @@ export function useDocuments(params: UseDocumentsParams = {}) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setDocuments((data as Document[]) || []);
+
+      // Fetch uploader profiles separately
+      const uploaderIds = [...new Set(data?.map((d) => d.uploaded_by) || [])];
+      let profilesMap: Record<string, { full_name: string | null; email: string }> = {};
+
+      if (uploaderIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", uploaderIds);
+
+        if (profiles) {
+          profilesMap = profiles.reduce((acc, p) => {
+            acc[p.id] = { full_name: p.full_name, email: p.email };
+            return acc;
+          }, {} as Record<string, { full_name: string | null; email: string }>);
+        }
+      }
+
+      const documentsWithUploaders: Document[] = (data || []).map((doc) => ({
+        ...doc,
+        uploader: profilesMap[doc.uploaded_by],
+      }));
+
+      setDocuments(documentsWithUploaders);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast({
