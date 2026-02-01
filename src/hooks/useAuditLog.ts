@@ -10,14 +10,48 @@ export type AuditAction =
   | "user.update_profile"
   | "user.update_role"
   | "user.update_status"
+  | "user.password_reset_request"
+  | "user.password_reset_complete"
   | "team.create"
   | "team.update"
   | "team.delete"
   | "team.add_member"
   | "team.remove_member"
-  | "team.update_member_role";
+  | "team.update_member_role"
+  | "lead.create"
+  | "lead.update"
+  | "lead.delete"
+  | "lead.reassign"
+  | "lead.convert"
+  | "contact.create"
+  | "contact.update"
+  | "contact.delete"
+  | "deal.create"
+  | "deal.update"
+  | "deal.delete"
+  | "deal.stage_change"
+  | "deal.reassign"
+  | "task.create"
+  | "task.update"
+  | "task.delete"
+  | "task.complete"
+  | "document.upload"
+  | "document.delete"
+  | "note.create"
+  | "communication.create";
 
-export type EntityType = "user" | "team" | "team_member" | "profile";
+export type EntityType = 
+  | "user" 
+  | "team" 
+  | "team_member" 
+  | "profile"
+  | "lead"
+  | "contact"
+  | "deal"
+  | "task"
+  | "document"
+  | "note"
+  | "communication";
 
 interface LogAuditParams {
   action: AuditAction;

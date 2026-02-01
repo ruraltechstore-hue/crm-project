@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { Task, TaskFormData, TaskStatus } from "@/types/tasks";
 
 export function useTasks(filters?: {
@@ -15,6 +16,7 @@ export function useTasks(filters?: {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { logAudit } = useAuditLog();
 
   const fetchTasks = useCallback(async () => {
     if (!user) return;
@@ -51,11 +53,27 @@ export function useTasks(filters?: {
 
       if (error) throw error;
       
+      // Fetch assignee and creator profiles
+      const userIds = [...new Set([
+        ...(data || []).map(t => t.assigned_to),
+        ...(data || []).map(t => t.created_by),
+      ])];
+      
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
+      
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
+      
       // Map to Task type
       const mappedTasks: Task[] = (data || []).map(task => ({
         ...task,
-        assignee: null,
-        creator: null,
+        assignee: profileMap.get(task.assigned_to) || null,
+        creator: profileMap.get(task.created_by) || null,
       }));
       
       setTasks(mappedTasks);
@@ -78,7 +96,7 @@ export function useTasks(filters?: {
     if (!user) return;
 
     try {
-      const { error } = await supabase.from("tasks").insert({
+      const { data: newTask, error } = await supabase.from("tasks").insert({
         title: data.title,
         description: data.description || null,
         priority: data.priority,
@@ -89,9 +107,16 @@ export function useTasks(filters?: {
         deal_id: data.deal_id || null,
         assigned_to: data.assigned_to,
         created_by: user.id,
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      await logAudit({
+        action: "task.create",
+        entityType: "task",
+        entityId: newTask.id,
+        newValues: data as unknown as Record<string, unknown>,
+      });
 
       toast({
         title: "Task created",
@@ -129,6 +154,14 @@ export function useTasks(filters?: {
 
       if (error) throw error;
 
+      if (status === "completed") {
+        await logAudit({
+          action: "task.complete",
+          entityType: "task",
+          entityId: taskId,
+        });
+      }
+
       toast({
         title: "Task updated",
         description: `Task marked as ${status.replace("_", " ")}.`,
@@ -164,6 +197,13 @@ export function useTasks(filters?: {
         .eq("id", taskId);
 
       if (error) throw error;
+
+      await logAudit({
+        action: "task.update",
+        entityType: "task",
+        entityId: taskId,
+        newValues: data as unknown as Record<string, unknown>,
+      });
 
       toast({
         title: "Task updated",
@@ -213,7 +253,14 @@ export function useOverdueTasks() {
           .order("due_date", { ascending: true });
 
         if (error) throw error;
-        setOverdueTasks(data || []);
+        
+        const mappedTasks: Task[] = (data || []).map(task => ({
+          ...task,
+          assignee: null,
+          creator: null,
+        }));
+        
+        setOverdueTasks(mappedTasks);
       } catch (error) {
         console.error("Error fetching overdue tasks:", error);
       } finally {
