@@ -21,37 +21,42 @@ export function useContacts() {
 
       // Fetch owner profiles
       const ownerIds = [...new Set(data.map(c => c.owner_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", ownerIds);
-
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
+      
+      if (ownerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", ownerIds);
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
 
       // Fetch phones and emails for all contacts
       const contactIds = data.map(c => c.id);
       
-      const [phonesResult, emailsResult] = await Promise.all([
-        supabase.from("contact_phones").select("*").in("contact_id", contactIds),
-        supabase.from("contact_emails").select("*").in("contact_id", contactIds),
-      ]);
+      let phonesMap = new Map<string, ContactPhone[]>();
+      let emailsMap = new Map<string, ContactEmail[]>();
 
-      const phonesMap = new Map<string, ContactPhone[]>();
-      const emailsMap = new Map<string, ContactEmail[]>();
+      if (contactIds.length > 0) {
+        const [phonesResult, emailsResult] = await Promise.all([
+          supabase.from("contact_phones").select("*").in("contact_id", contactIds),
+          supabase.from("contact_emails").select("*").in("contact_id", contactIds),
+        ]);
 
-      phonesResult.data?.forEach(phone => {
-        if (!phonesMap.has(phone.contact_id)) {
-          phonesMap.set(phone.contact_id, []);
-        }
-        phonesMap.get(phone.contact_id)!.push(phone);
-      });
+        phonesResult.data?.forEach(phone => {
+          if (!phonesMap.has(phone.contact_id)) {
+            phonesMap.set(phone.contact_id, []);
+          }
+          phonesMap.get(phone.contact_id)!.push(phone);
+        });
 
-      emailsResult.data?.forEach(email => {
-        if (!emailsMap.has(email.contact_id)) {
-          emailsMap.set(email.contact_id, []);
-        }
-        emailsMap.get(email.contact_id)!.push(email);
-      });
+        emailsResult.data?.forEach(email => {
+          if (!emailsMap.has(email.contact_id)) {
+            emailsMap.set(email.contact_id, []);
+          }
+          emailsMap.get(email.contact_id)!.push(email);
+        });
+      }
 
       return data.map(contact => ({
         ...contact,
@@ -104,8 +109,8 @@ export function useContacts() {
       }
 
       await logAudit({
-        action: "team.create",
-        entityType: "team",
+        action: "contact.create",
+        entityType: "contact",
         entityId: data.id,
         newValues: contact,
       });
@@ -158,6 +163,13 @@ export function useContacts() {
         }
       }
 
+      await logAudit({
+        action: "contact.update",
+        entityType: "contact",
+        entityId: id,
+        newValues: { ...updates, phones, emails },
+      });
+
       return data;
     },
     onSuccess: () => {
@@ -173,6 +185,12 @@ export function useContacts() {
         .eq("id", id);
 
       if (error) throw error;
+
+      await logAudit({
+        action: "contact.delete",
+        entityType: "contact",
+        entityId: id,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contacts"] });
@@ -237,12 +255,15 @@ export function useContactActivities(contactId: string) {
       if (error) throw error;
 
       const userIds = [...new Set(data.map(a => a.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", userIds);
-
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
+      
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
 
       return data.map(activity => ({
         ...activity,
@@ -336,8 +357,8 @@ export function useConvertLeadToContact() {
       if (leadError) throw leadError;
 
       await logAudit({
-        action: "team.update",
-        entityType: "team",
+        action: "lead.convert",
+        entityType: "lead",
         entityId: leadId,
         newValues: { converted_to_contact_id: contact.id },
       });

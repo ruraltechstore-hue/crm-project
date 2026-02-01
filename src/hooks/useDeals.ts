@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { Deal, DealActivity, DealStageHistory, DealStage } from "@/types/deals";
 import { toast } from "sonner";
 
@@ -9,6 +10,7 @@ export function useDeals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const { logAudit } = useAuditLog();
 
   const fetchDeals = async () => {
     if (!user) return;
@@ -28,12 +30,16 @@ export function useDeals() {
 
       // Fetch owner profiles separately
       const ownerIds = [...new Set(data.map((d) => d.owner_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", ownerIds);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
+      
+      if (ownerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", ownerIds);
 
-      const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+        profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+      }
 
       const dealsWithOwners = data.map((deal) => ({
         ...deal,
@@ -85,6 +91,13 @@ export function useDeals() {
         notes: "Deal created",
       });
 
+      await logAudit({
+        action: "deal.create",
+        entityType: "deal",
+        entityId: data.id,
+        newValues: dealData,
+      });
+
       toast.success("Deal created successfully");
       await fetchDeals();
       return data;
@@ -106,6 +119,13 @@ export function useDeals() {
 
       if (error) throw error;
 
+      await logAudit({
+        action: "deal.update",
+        entityType: "deal",
+        entityId: dealId,
+        newValues: updates,
+      });
+
       toast.success("Deal updated successfully");
       await fetchDeals();
       return true;
@@ -123,6 +143,10 @@ export function useDeals() {
     if (!user) return false;
 
     try {
+      // Get current stage for history
+      const currentDeal = deals.find(d => d.id === dealId);
+      const oldStage = currentDeal?.stage;
+
       const updates: Partial<Deal> = { stage: newStage };
       
       // Set actual close date for closed stages
@@ -137,6 +161,23 @@ export function useDeals() {
 
       if (error) throw error;
 
+      // Log stage change in history
+      await supabase.from("deal_stage_history").insert({
+        deal_id: dealId,
+        old_stage: oldStage,
+        new_stage: newStage,
+        changed_by: user.id,
+        notes: notes || null,
+      });
+
+      await logAudit({
+        action: "deal.stage_change",
+        entityType: "deal",
+        entityId: dealId,
+        oldValues: { stage: oldStage },
+        newValues: { stage: newStage },
+      });
+
       toast.success(`Deal moved to ${newStage.replace("_", " ")}`);
       await fetchDeals();
       return true;
@@ -148,12 +189,23 @@ export function useDeals() {
 
   const reassignDeal = async (dealId: string, newOwnerId: string) => {
     try {
+      const currentDeal = deals.find(d => d.id === dealId);
+      const oldOwnerId = currentDeal?.owner_id;
+
       const { error } = await supabase
         .from("deals")
         .update({ owner_id: newOwnerId })
         .eq("id", dealId);
 
       if (error) throw error;
+
+      await logAudit({
+        action: "deal.reassign",
+        entityType: "deal",
+        entityId: dealId,
+        oldValues: { owner_id: oldOwnerId },
+        newValues: { owner_id: newOwnerId },
+      });
 
       toast.success("Deal reassigned successfully");
       await fetchDeals();
@@ -238,12 +290,16 @@ export function useDealActivities(dealId: string) {
 
       // Fetch user profiles
       const userIds = [...new Set(data.map((a) => a.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", userIds);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
+      
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
 
-      const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+        profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+      }
 
       const activitiesWithUsers = data.map((activity) => ({
         ...activity,
@@ -314,12 +370,16 @@ export function useDealStageHistory(dealId: string) {
 
         // Fetch user profiles
         const userIds = [...new Set(data.map((h) => h.changed_by))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, email")
-          .in("id", userIds);
+        let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
+        
+        if (userIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name, email")
+            .in("id", userIds);
 
-        const profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+          profileMap = new Map(profiles?.map((p) => [p.id, p]) || []);
+        }
 
         const historyWithUsers = data.map((item) => ({
           ...item,

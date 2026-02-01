@@ -21,12 +21,16 @@ export function useLeads() {
       
       // Fetch owner profiles separately
       const ownerIds = [...new Set(data.map(l => l.owner_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", ownerIds);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
       
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      if (ownerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", ownerIds);
+        
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
       
       return data.map(lead => ({
         ...lead,
@@ -58,8 +62,8 @@ export function useLeads() {
       if (error) throw error;
       
       await logAudit({
-        action: "team.create",
-        entityType: "team",
+        action: "lead.create",
+        entityType: "lead",
         entityId: data.id,
         newValues: lead,
       });
@@ -95,8 +99,8 @@ export function useLeads() {
       if (error) throw error;
 
       await logAudit({
-        action: "team.update",
-        entityType: "team",
+        action: "lead.update",
+        entityType: "lead",
         entityId: id,
         oldValues: oldLead || undefined,
         newValues: updates,
@@ -145,8 +149,8 @@ export function useLeads() {
       if (error) throw error;
 
       await logAudit({
-        action: "team.update",
-        entityType: "team",
+        action: "lead.reassign",
+        entityType: "lead",
         entityId: id,
         oldValues: { owner_id: oldLead?.owner_id },
         newValues: { owner_id: newOwnerId },
@@ -214,12 +218,16 @@ export function useLeadActivities(leadId: string) {
       
       // Fetch user profiles separately
       const userIds = [...new Set(data.map(a => a.user_id))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", userIds);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
       
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", userIds);
+        
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
       
       return data.map(activity => ({
         ...activity,
@@ -275,12 +283,16 @@ export function useLeadStatusHistory(leadId: string) {
       
       // Fetch changer profiles separately
       const changerIds = [...new Set(data.map(h => h.changed_by))];
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", changerIds);
+      let profileMap = new Map<string, { id: string; full_name: string | null; email: string }>();
       
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      if (changerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", changerIds);
+        
+        profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      }
       
       return data.map(history => ({
         ...history,
