@@ -210,7 +210,7 @@ export default function Calls() {
             <PhoneCall className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+            <div className="text-2xl font-bold text-primary">{stats.completed}</div>
           </CardContent>
         </Card>
         <Card>
