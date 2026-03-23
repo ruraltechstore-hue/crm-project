@@ -12,6 +12,7 @@ import {
   Briefcase,
   CheckSquare,
   BarChart3,
+  Phone,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,6 +60,11 @@ const mainNavItems = [
     title: "Tasks",
     url: "/tasks",
     icon: CheckSquare,
+  },
+  {
+    title: "Calls",
+    url: "/calls",
+    icon: Phone,
   },
   {
     title: "Reports",
