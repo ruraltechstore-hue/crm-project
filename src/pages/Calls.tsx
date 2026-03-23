@@ -271,7 +271,7 @@ export default function Calls() {
           ) : filteredCalls.length === 0 ? (
             <div className="p-6">
               <EmptyState
-                icon={Phone}
+                icon={<Phone className="h-5 w-5 text-muted-foreground" />}
                 title="No calls found"
                 description={search || filter !== "all" ? "Try adjusting your filters" : "Log your first call to get started"}
               />
