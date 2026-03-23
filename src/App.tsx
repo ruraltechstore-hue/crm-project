@@ -18,6 +18,7 @@ import ContactDetail from "@/pages/ContactDetail";
 import Deals from "@/pages/Deals";
 import DealDetail from "@/pages/DealDetail";
 import Tasks from "@/pages/Tasks";
+import Calls from "@/pages/Calls";
 import Reports from "@/pages/Reports";
 import AdminUsers from "@/pages/admin/Users";
 import AdminRoles from "@/pages/admin/Roles";
