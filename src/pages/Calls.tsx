@@ -320,7 +320,7 @@ export default function Calls() {
                         <div className="flex justify-end gap-1">
                           {call.status !== "completed" && (
                             <Button size="icon" variant="ghost" title="Mark Completed" onClick={() => handleStatusChange(call.id, "completed")}>
-                              <Check className="h-4 w-4 text-green-600" />
+                              <Check className="h-4 w-4 text-primary" />
                             </Button>
                           )}
                           {call.status !== "missed" && (
