@@ -62,6 +62,11 @@ const mainNavItems = [
     icon: CheckSquare,
   },
   {
+    title: "Calls",
+    url: "/calls",
+    icon: Phone,
+  },
+  {
     title: "Reports",
     url: "/reports",
     icon: BarChart3,
