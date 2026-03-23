@@ -171,7 +171,7 @@ export default function Calls() {
   const statusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <Badge variant="default" className="bg-green-600"><Check className="mr-1 h-3 w-3" />Completed</Badge>;
+        return <Badge variant="default"><Check className="mr-1 h-3 w-3" />Completed</Badge>;
       case "missed":
         return <Badge variant="destructive"><PhoneMissed className="mr-1 h-3 w-3" />Missed</Badge>;
       case "scheduled":
